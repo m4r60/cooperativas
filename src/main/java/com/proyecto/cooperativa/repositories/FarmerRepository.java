@@ -31,23 +31,23 @@ public class FarmerRepository {
             "email");
 
     public Map<String, Object> getFarmersList(String textToSearch) {
-        StringBuilder query = buildSelectClause();
+        String query = buildSelectClause();
         String whereClause = buildWhereClause(textToSearch);
         if (!StringUtils.isEmpty(whereClause)) {
-            query.append(whereClause);
-            return jdbcTemplate.queryForMap(query.toString(), buildWhereClauseParameters(textToSearch));
+            query += whereClause;
+            return jdbcTemplate.queryForMap(query, buildWhereClauseParameters(textToSearch));
         } else {
-            return jdbcTemplate.queryForMap(query.toString());
+            return jdbcTemplate.queryForMap(query);
         }
     }
 
 
-    private StringBuilder buildSelectClause() {
-        return new StringBuilder(SELECT
+    private String buildSelectClause() {
+        return  SELECT
                 + farmerFieldsToGet.stream().collect(Collectors.joining(COMMA_SEPARATOR))
                 + FROM + "PERSONAS"
                 + " JOIN (p.id_persona = a.id_persona) ON "
-                + "agricultores a");
+                + "agricultores a";
     }
 
     private String buildWhereClause(String textToSearch) {
