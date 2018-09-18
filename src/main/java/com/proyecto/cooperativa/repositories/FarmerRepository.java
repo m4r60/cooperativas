@@ -30,9 +30,9 @@ public class FarmerRepository {
     public Map<String, Object> getFarmersList(String textToSearch) {
         StringBuilder query = buildSelectClause();
         String whereClause = buildWhereClause(textToSearch);
-        if (StringUtils.isEmpty(whereClause)) {
+        if (!StringUtils.isEmpty(whereClause)) {
             query.append(whereClause);
-            return jdbcTemplate.queryForMap(query.toString(), buildParametersOfQuery(textToSearch));
+            return jdbcTemplate.queryForMap(query.toString(), buildWhereClauseParameters(textToSearch));
         } else {
             return jdbcTemplate.queryForMap(query.toString());
         }
@@ -50,15 +50,16 @@ public class FarmerRepository {
     private String buildWhereClause(String textToSearch) {
         String whereClause = "";
         if (!StringUtils.isEmpty(textToSearch)) {
-            whereClause = WHERE + farmerFieldsToGet
-                    .stream().collect(Collectors.joining(LIKE + OR))
+            whereClause = WHERE
+                    + farmerFieldsToGet.stream()
+                    .collect(Collectors.joining(LIKE + OR))
                     + LIKE;
 
         }
         return whereClause;
     }
 
-    private String[] buildParametersOfQuery(String textToSearch) {
+    private String[] buildWhereClauseParameters(String textToSearch) {
         String[] fieldsToSearch = new String[farmerFieldsToGet.size()];
         Arrays.fill(fieldsToSearch, PERCENT + textToSearch + PERCENT);
         return fieldsToSearch;
