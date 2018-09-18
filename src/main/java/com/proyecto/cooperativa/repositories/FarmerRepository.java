@@ -16,6 +16,8 @@ public class FarmerRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    private static final String SELECT = "SELECT ";
+    private static final String FROM = " FROM ";
     private static final String WHERE = " WHERE ";
     private static final String LIKE = " LIKE ?";
     private static final String OR = " OR ";
@@ -41,9 +43,9 @@ public class FarmerRepository {
 
 
     private StringBuilder buildSelectClause() {
-        return new StringBuilder("SELECT  "
+        return new StringBuilder(SELECT
                 + farmerFieldsToGet.stream().collect(Collectors.joining(COMMA_SEPARATOR))
-                + " FROM PERSONAS"
+                + FROM + "PERSONAS"
                 + " JOIN (p.id_persona = a.id_persona) ON "
                 + "agricultores a");
     }
