@@ -1,7 +1,6 @@
 package com.proyecto.cooperativa.models;
 
 import lombok.*;
-import org.springframework.stereotype.Component;
 //@toString() - Cuando pintas un objeto sale una referencia. Si pones toString()
 //Se pinta el contenido del objeto.
 //Si quieres determinar un tipo de igualdad - @EqualsAndHashCode
@@ -35,6 +34,7 @@ are marked as @NonNull that aren't initialized where they are declared. For thos
 public class Person {
     private int personId;
     private String cifNif;
+    private String name;
     private String lastName;
     private String adress;
     private String phoneNumber;

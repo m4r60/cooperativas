@@ -35,62 +35,68 @@ public class FarmerRepository {
             "p.email");
 
     public List<Map<String, Object>> getFarmersList(String textToSearch) {
-        String query = buildSelectClause();
-        String whereClause = buildWhereClause(textToSearch);
-        if (!StringUtils.isEmpty(whereClause)) {
-            query += whereClause;
-            return jdbcTemplate.queryForList(query,
-                    textToSearch,
-                    textToSearch,
-                    textToSearch,
-                    textToSearch,
-                    textToSearch,
-                    textToSearch,
-                    textToSearch);
+        String query = buildSql(textToSearch);
+        if (hasSearchingText(query)) {
+            textToSearch = PERCENT + textToSearch + PERCENT;
+            return getFilteredList(query, textToSearch);
         } else {
             return jdbcTemplate.queryForList(query);
         }
     }
 
-    private String buildSelectClause() {
+    private List<Map<String, Object>> getFilteredList(String query,String textToSearch){
+        textToSearch = PERCENT + textToSearch + PERCENT;
+        return jdbcTemplate.queryForList(query,
+                textToSearch,
+                textToSearch,
+                textToSearch,
+                textToSearch,
+                textToSearch,
+                textToSearch,
+                textToSearch);
+    }
+
+    private String buildSql(String textToSearch) {
+        return buildSelect() + buildWhere(textToSearch);
+
+    }
+
+    private boolean hasSearchingText(String query){
+        return query.contains(WHERE);
+    }
+
+    private String buildSelect() {
         return SELECT
                 + farmerFieldsToGet.stream().collect(Collectors.joining(COMMA_SEPARATOR))
                 + FROM + "PERSONAS p "
                 + " JOIN agricultores a ON (p.id_persona = a.id_persona) ";
     }
 
-    private String buildWhereClause(String textToSearch) {
+    private String buildWhere(String textToSearch) {
         String whereClause = "";
         if (!StringUtils.isEmpty(textToSearch)) {
             whereClause = WHERE
                     + farmerFieldsToGet.stream()
                     .collect(Collectors.joining(LIKE + OR))
                     + LIKE;
-
         }
         return whereClause;
     }
 
-//    private Object buildWhereClauseParameters(String textToSearch) {
-//        textToSearch = PERCENT + textToSearch + PERCENT;
-//        return new Object[]{textToSearch,
-//                textToSearch,
-//                textToSearch,
-//                textToSearch,
-//                textToSearch,
-//                textToSearch,
-//                textToSearch};
-//    }
-
-
     class FarmerRowMapper implements RowMapper<Farmer> {
+        @Override
         public Farmer mapRow(ResultSet rs, int rowNumber) throws SQLException {
             Farmer farmer = new Farmer();
-
-            return new Farmer();
+            farmer.setFarmerId(rs.getInt(1));
+            farmer.setCifNif(rs.getString(2));
+            farmer.setName(rs.getString(3));
+            farmer.setLastName(rs.getString(4));
+            farmer.setAdress(rs.getString(5));
+            farmer.setPhoneNumber(rs.getString(6));
+            farmer.setEmail(rs.getString(7));
+            return farmer;
         }
 
     }
-
 
 }
