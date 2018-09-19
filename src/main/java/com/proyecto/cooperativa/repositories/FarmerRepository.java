@@ -26,20 +26,27 @@ public class FarmerRepository {
     private static final String LIKE = " LIKE ?";
     private static final String OR = " OR ";
     private static final String PERCENT = "%";
-    private static final String COMMA_SEPARATOR = ",";
-    private List<String> farmerFieldsToGet = Arrays.asList("n_socio", "cif_nif",
-            "nombre_razon_social",
-            "apellido",
-            "direccion",
-            "telefono",
-            "email");
+    private static final String COMMA_SEPARATOR = ", ";
+    private List<String> farmerFieldsToGet = Arrays.asList("a.n_socio", "p.cif_nif",
+            "p.nombre_razon_social",
+            "p.apellidos",
+            "p.direccion",
+            "p.telefono",
+            "p.email");
 
     public List<Map<String, Object>> getFarmersList(String textToSearch) {
         String query = buildSelectClause();
         String whereClause = buildWhereClause(textToSearch);
         if (!StringUtils.isEmpty(whereClause)) {
             query += whereClause;
-            return jdbcTemplate.queryForList(query, buildWhereClauseParameters(textToSearch));
+            return jdbcTemplate.queryForList(query,
+                    textToSearch,
+                    textToSearch,
+                    textToSearch,
+                    textToSearch,
+                    textToSearch,
+                    textToSearch,
+                    textToSearch);
         } else {
             return jdbcTemplate.queryForList(query);
         }
@@ -48,9 +55,8 @@ public class FarmerRepository {
     private String buildSelectClause() {
         return SELECT
                 + farmerFieldsToGet.stream().collect(Collectors.joining(COMMA_SEPARATOR))
-                + FROM + "PERSONAS"
-                + " JOIN (p.id_persona = a.id_persona) ON "
-                + "agricultores a";
+                + FROM + "PERSONAS p "
+                + " JOIN agricultores a ON (p.id_persona = a.id_persona) ";
     }
 
     private String buildWhereClause(String textToSearch) {
@@ -65,16 +71,22 @@ public class FarmerRepository {
         return whereClause;
     }
 
-    private String[] buildWhereClauseParameters(String textToSearch) {
-        String[] fieldsToSearch = new String[farmerFieldsToGet.size()];
-        Arrays.fill(fieldsToSearch, PERCENT + textToSearch + PERCENT);
-        return fieldsToSearch;
-    }
+//    private Object buildWhereClauseParameters(String textToSearch) {
+//        textToSearch = PERCENT + textToSearch + PERCENT;
+//        return new Object[]{textToSearch,
+//                textToSearch,
+//                textToSearch,
+//                textToSearch,
+//                textToSearch,
+//                textToSearch,
+//                textToSearch};
+//    }
 
 
     class FarmerRowMapper implements RowMapper<Farmer> {
         public Farmer mapRow(ResultSet rs, int rowNumber) throws SQLException {
             Farmer farmer = new Farmer();
+
             return new Farmer();
         }
 

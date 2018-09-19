@@ -10,6 +10,6 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Farmer extends Person {
-    public int id;
-    public boolean dropOut;
+    private int id;
+    private boolean dropOut;
 }

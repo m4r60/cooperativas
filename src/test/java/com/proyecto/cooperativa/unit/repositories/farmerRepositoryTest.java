@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -32,18 +33,20 @@ public class farmerRepositoryTest {
     private static final String EMAIL = "email";
     private static final String PHONE = "telefono";
     private static final String CIF_NIF = "cif_nif";
+    private static final int SIZE_OF_ROW_FIELDS = 6;
+    private static final String PERCENT = "%";
 
     @Test
     public void testGetFarmerList() throws Exception {
-        final String select = "SELECT  n_socio, " +
-                "cif_nif, " +
-                "nombre_razon_social, " +
-                "apellido, " +
-                "direccion, " +
-                "telefono, " +
-                "email " +
+        final String select = "SELECT  p.n_socio, " +
+                "p.cif_nif, " +
+                "p.nombre_razon_social, " +
+                "p.apellido, " +
+                "p.direccion, " +
+                "p.telefono, " +
+                "p.email " +
                 "FROM PERSONAS p " +
-                "JOIN (p.persona_id = a.persona_id) ON AGRICULTORES a ";
+                "JOIN AGRICULTORES a ON (p.persona_id = a.persona_id) ";
         testWithTextToSearch(select);
         testNoSearchingText(select);
     }
@@ -61,16 +64,24 @@ public class farmerRepositoryTest {
     private void testWithTextToSearch(String select) throws Exception {
         //given
         String textToSearch = "usuario";
-        final String sqlExpected = select +
-                " WHERE cif_nif like ? " +
-                "OR nombre_razon_social like ? " +
-                "OR apellido like ? " +
-                "OR direccion like ? " +
-                "OR telefono like ?  " +
-                "OR email like ?";
+        final String sqlExpected = select
+                +" WHERE a.n_socio like ? "
+                +"OR p.cif_nif like ? "
+                +"OR p.nombre_razon_social like ? "
+                +"OR p.apellido like ? "
+                +"OR p.direccion like ? "
+                +"OR p.telefono like ?  "
+                +"OR p.email like ? ";
+        textToSearch = PERCENT + textToSearch + PERCENT;
         //when
         List<Map<String, Object>> actual = farmerRepository.getFarmersList(textToSearch);
-        List<Map<String, Object>> expected = jdbcTemplate.queryForList(sqlExpected);
+        List<Map<String, Object>> expected = jdbcTemplate.queryForList(sqlExpected, textToSearch,
+                textToSearch,
+                textToSearch,
+                textToSearch,
+                textToSearch,
+                textToSearch,
+                textToSearch);
         //then
         assertActualAndExpectedLists(actual, expected);
     }
