@@ -2,7 +2,6 @@ package com.proyecto.cooperativa.models;
 
 import org.springframework.stereotype.Component;
 
-@Component
 public class Constants {
     //Validation string
     public static final String EMAIL_VALIDATION = "^([\\w-\\.]+){1,64}@([\\w&&[^_]]+){2,255}.[a-z]{2,}$";

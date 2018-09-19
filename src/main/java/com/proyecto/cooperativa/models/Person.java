@@ -28,7 +28,6 @@ field that requires special handling. All non-initialized
 final fields get a parameter, as well as any fields that
 are marked as @NonNull that aren't initialized where they are declared. For those fields marked with @NonNull, an explicit null check is also generated. The constructor will throw a NullPointerException if any of the parameters intended for the fields marked with @NonNull contain null. The order of the parameters match the order in which the fields appear in your class.
 */
-@Component
 @Data //Implementaciones: @ToString, @EqualsAndHashCode, @Getter / @Setter and @RequiredArgsConstructor
 //Indicates that an annotated class is a "component". Such classes are considered as candidates for auto-detection when using annotation-based configuration and classpath scanning.
 @AllArgsConstructor //Tengo un constructor con todos los elementos.

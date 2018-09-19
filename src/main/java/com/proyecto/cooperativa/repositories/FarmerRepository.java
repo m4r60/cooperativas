@@ -1,10 +1,14 @@
 package com.proyecto.cooperativa.repositories;
 
+import com.proyecto.cooperativa.models.Farmer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +46,7 @@ public class FarmerRepository {
     }
 
     private String buildSelectClause() {
-        return  SELECT
+        return SELECT
                 + farmerFieldsToGet.stream().collect(Collectors.joining(COMMA_SEPARATOR))
                 + FROM + "PERSONAS"
                 + " JOIN (p.id_persona = a.id_persona) ON "
@@ -54,7 +58,7 @@ public class FarmerRepository {
         if (!StringUtils.isEmpty(textToSearch)) {
             whereClause = WHERE
                     + farmerFieldsToGet.stream()
-                        .collect(Collectors.joining(LIKE + OR))
+                    .collect(Collectors.joining(LIKE + OR))
                     + LIKE;
 
         }
@@ -68,6 +72,13 @@ public class FarmerRepository {
     }
 
 
+    class FarmerRowMapper implements RowMapper<Farmer> {
+        public Farmer mapRow(ResultSet rs, int rowNumber) throws SQLException {
+            Farmer farmer = new Farmer();
+            return new Farmer();
+        }
+
+    }
 
 
 }

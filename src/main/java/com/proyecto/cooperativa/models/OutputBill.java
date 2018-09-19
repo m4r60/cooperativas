@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.stream.Stream;
 
-@Component
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

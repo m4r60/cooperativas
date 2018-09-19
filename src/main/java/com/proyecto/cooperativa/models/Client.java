@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 
 @Data
-@Component
 @NoArgsConstructor
 @AllArgsConstructor
 public class Client {
