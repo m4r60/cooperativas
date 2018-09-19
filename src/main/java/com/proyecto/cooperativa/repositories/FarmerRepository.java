@@ -30,17 +30,16 @@ public class FarmerRepository {
             "telefono",
             "email");
 
-    public Map<String, Object> getFarmersList(String textToSearch) {
+    public List<Map<String, Object>> getFarmersList(String textToSearch) {
         String query = buildSelectClause();
         String whereClause = buildWhereClause(textToSearch);
         if (!StringUtils.isEmpty(whereClause)) {
             query += whereClause;
-            return jdbcTemplate.queryForMap(query, buildWhereClauseParameters(textToSearch));
+            return jdbcTemplate.queryForList(query, buildWhereClauseParameters(textToSearch));
         } else {
-            return jdbcTemplate.queryForMap(query);
+            return jdbcTemplate.queryForList(query);
         }
     }
-
 
     private String buildSelectClause() {
         return  SELECT
@@ -55,7 +54,7 @@ public class FarmerRepository {
         if (!StringUtils.isEmpty(textToSearch)) {
             whereClause = WHERE
                     + farmerFieldsToGet.stream()
-                    .collect(Collectors.joining(LIKE + OR))
+                        .collect(Collectors.joining(LIKE + OR))
                     + LIKE;
 
         }
@@ -67,5 +66,8 @@ public class FarmerRepository {
         Arrays.fill(fieldsToSearch, PERCENT + textToSearch + PERCENT);
         return fieldsToSearch;
     }
+
+
+
 
 }
