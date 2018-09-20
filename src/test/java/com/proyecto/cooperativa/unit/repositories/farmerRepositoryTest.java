@@ -2,12 +2,14 @@ package com.proyecto.cooperativa.unit.repositories;
 
 import com.proyecto.cooperativa.models.Farmer;
 import com.proyecto.cooperativa.repositories.FarmerRepository;
+import lombok.NonNull;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StringUtils;
 
@@ -19,6 +21,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -111,7 +114,7 @@ public class farmerRepositoryTest {
         assertThat(incorrectMaps, is(ZERO));
     }
 
-    private String getValidationStringFrom(String field) {
+    private String getValidationStringFrom(@NonNull String field) {
         switch (field) {
             case EMAIL:
                 return EMAIL_VALIDATION;
@@ -127,8 +130,18 @@ public class farmerRepositoryTest {
 
     @Test
     public void testCreateFarmer(){
-//        final String sql = "INSERT INTO AGRICULTORES (id_persona, baja) VALUES (?,?)";
-//        int n = jdbcTemplate.update(sql, 5, false );
+        //Given
+        Farmer current = new Farmer();
+        current.setFarmerId(5);
+        current.setDropOut(false);
+
+        assertTrue(farmerRepository.createFarmer(current));
+
+        final String sql = "SELECT * FROM AGRICULTORES WHERE ID_PERSONA = ?";
+//        Map<String, Object> retrieved = jdbcTemplate.queryForMap(sql, RowMapper<Farmer>);
+
+//        assertEquals(retrieved);
+
 
     }
 

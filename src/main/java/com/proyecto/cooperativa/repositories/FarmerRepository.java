@@ -32,6 +32,8 @@ public class FarmerRepository {
     private static final String INSERT_INTO = "INSERT INTO ";
     private static final String VALUES = " ) VALUES (";
     private static final String QUESTION_MARK = "?";
+    private static final String TABLE_NAME = " AGRICULTORES ";
+    private static final String PARENTHESIS = " (";
 
     private List<String> farmerFieldsToGet = Arrays.asList("a.n_socio", "p.cif_nif",
             "p.nombre_razon_social",
@@ -90,7 +92,8 @@ public class FarmerRepository {
 
     public boolean createFarmer(@NonNull Farmer farmer) {
         final String sql = INSERT_INTO
-                + "AGRICULTORES ("
+                + TABLE_NAME
+                +PARENTHESIS
                 + farmerFieldsToCreate.stream()
                 .collect(Collectors.joining(COMMA_SEPARATOR))
                 + VALUES
@@ -119,12 +122,7 @@ public class FarmerRepository {
         public Farmer mapRow(ResultSet rs, int rowNumber) throws SQLException {
             Farmer farmer = new Farmer();
             farmer.setFarmerId(rs.getInt(1));
-            farmer.setCifNif(rs.getString(2));
-            farmer.setName(rs.getString(3));
-            farmer.setLastName(rs.getString(4));
-            farmer.setAdress(rs.getString(5));
-            farmer.setPhoneNumber(rs.getString(6));
-            farmer.setEmail(rs.getString(7));
+            farmer.setDropOut(rs.getBoolean(2));
             return farmer;
         }
 
