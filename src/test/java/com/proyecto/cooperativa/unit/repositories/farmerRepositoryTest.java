@@ -1,5 +1,6 @@
 package com.proyecto.cooperativa.unit.repositories;
 
+import com.proyecto.cooperativa.models.Farmer;
 import com.proyecto.cooperativa.repositories.FarmerRepository;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Test;
@@ -123,5 +124,12 @@ public class farmerRepositoryTest {
         }
     }
 
+
+    @Test
+    public void testCreateFarmer(){
+//        final String sql = "INSERT INTO AGRICULTORES (id_persona, baja) VALUES (?,?)";
+//        int n = jdbcTemplate.update(sql, 5, false );
+
+    }
 
 }

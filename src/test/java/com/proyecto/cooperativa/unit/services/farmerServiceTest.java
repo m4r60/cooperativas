@@ -28,7 +28,6 @@ public class farmerServiceTest {
 
     @Test
     public void testGetFarmerList(){
-
     }
 
 
