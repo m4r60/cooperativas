@@ -1,6 +1,7 @@
 package com.proyecto.cooperativa.repositories;
 
 import com.proyecto.cooperativa.models.Farmer;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -10,6 +11,7 @@ import org.springframework.util.StringUtils;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,24 +29,28 @@ public class FarmerRepository {
     private static final String OR = " OR ";
     private static final String PERCENT = "%";
     private static final String COMMA_SEPARATOR = ", ";
+    private static final String INSERT_INTO = "INSERT INTO ";
+    private static final String VALUES = " ) VALUES (";
+    private static final String QUESTION_MARK = "?";
+
     private List<String> farmerFieldsToGet = Arrays.asList("a.n_socio", "p.cif_nif",
             "p.nombre_razon_social",
             "p.apellidos",
             "p.direccion",
             "p.telefono",
             "p.email");
+    private List<String> farmerFieldsToCreate = Arrays.asList("id_persona", "baja");
 
     public List<Map<String, Object>> getFarmersList(String textToSearch) {
         String query = buildSql(textToSearch);
         if (hasSearchingText(query)) {
-            textToSearch = PERCENT + textToSearch + PERCENT;
             return getFilteredList(query, textToSearch);
         } else {
             return jdbcTemplate.queryForList(query);
         }
     }
 
-    private List<Map<String, Object>> getFilteredList(String query,String textToSearch){
+    private List<Map<String, Object>> getFilteredList(@NonNull String query, String textToSearch) {
         textToSearch = PERCENT + textToSearch + PERCENT;
         return jdbcTemplate.queryForList(query,
                 textToSearch,
@@ -58,10 +64,9 @@ public class FarmerRepository {
 
     private String buildSql(String textToSearch) {
         return buildSelect() + buildWhere(textToSearch);
-
     }
 
-    private boolean hasSearchingText(String query){
+    private boolean hasSearchingText(String query) {
         return query.contains(WHERE);
     }
 
@@ -81,6 +86,32 @@ public class FarmerRepository {
                     + LIKE;
         }
         return whereClause;
+    }
+
+    public boolean createFarmer(@NonNull Farmer farmer) {
+        final String sql = INSERT_INTO
+                + "AGRICULTORES ("
+                + farmerFieldsToCreate.stream()
+                .collect(Collectors.joining(COMMA_SEPARATOR))
+                + VALUES
+                + buildValuesWithQuestionMarks(farmerFieldsToCreate.size());
+        return inserting(farmer, sql);
+    }
+
+    private boolean inserting(Farmer farmer, String sql) {
+        boolean isUpdated = false;
+        try {
+            isUpdated = jdbcTemplate.update(sql, farmer.getPersonId(),
+                    farmer.isDropOut()) > 0;
+        } catch (Exception e) {
+            //todo:add log message
+        }
+        return isUpdated;
+    }
+
+    private String buildValuesWithQuestionMarks(int numberOfValues) {
+        return Collections.nCopies(numberOfValues, QUESTION_MARK).stream()
+                .collect(Collectors.joining(COMMA_SEPARATOR));
     }
 
     class FarmerRowMapper implements RowMapper<Farmer> {
