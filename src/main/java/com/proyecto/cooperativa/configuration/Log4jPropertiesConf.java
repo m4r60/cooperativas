@@ -6,11 +6,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class Log4jPropertiesConf {
-    private static Logger logger = LoggerFactory.getLogger(Log4jPropertiesConf.class);
+    private static final Logger log = LoggerFactory.getLogger(Log4jPropertiesConf.class);
     public void testLoggerLevels(){
-        logger.debug("Log de debug.");
-        logger.info("Log de info.");
-        logger.warn("Log de warn.");
-        logger.error("Log de error.");
+        log.debug("Log de debug.");
+        log.info("Log de info.");
+        log.warn("Log de warn.");
+        log.error("Log de error.");
     }
 }

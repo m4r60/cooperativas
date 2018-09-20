@@ -2,14 +2,13 @@ package com.proyecto.cooperativa.repositories;
 
 import com.proyecto.cooperativa.models.Farmer;
 import lombok.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Repository
 public class FarmerRepository {
+    private static final Logger log = LoggerFactory.getLogger(FarmerRepository.class);
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -93,7 +93,7 @@ public class FarmerRepository {
     public boolean createFarmer(@NonNull Farmer farmer) {
         final String sql = INSERT_INTO
                 + TABLE_NAME
-                +PARENTHESIS
+                + PARENTHESIS
                 + farmerFieldsToCreate.stream()
                 .collect(Collectors.joining(COMMA_SEPARATOR))
                 + VALUES
@@ -106,8 +106,9 @@ public class FarmerRepository {
         try {
             isUpdated = jdbcTemplate.update(sql, farmer.getPersonId(),
                     farmer.isDropOut()) > 0;
+            log.info("Insercion en la tabla AGRICULTORES, query: " + sql);
         } catch (Exception e) {
-            //todo:add log message
+            log.error("Error: Insertar en la tabla AGRICULTORES, query: " + sql);
         }
         return isUpdated;
     }
@@ -117,15 +118,6 @@ public class FarmerRepository {
                 .collect(Collectors.joining(COMMA_SEPARATOR));
     }
 
-    class FarmerRowMapper implements RowMapper<Farmer> {
-        @Override
-        public Farmer mapRow(ResultSet rs, int rowNumber) throws SQLException {
-            Farmer farmer = new Farmer();
-            farmer.setFarmerId(rs.getInt(1));
-            farmer.setDropOut(rs.getBoolean(2));
-            return farmer;
-        }
 
-    }
 
 }

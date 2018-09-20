@@ -13,6 +13,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StringUtils;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -129,20 +131,52 @@ public class farmerRepositoryTest {
 
 
     @Test
-    public void testCreateFarmer(){
+    public void testCreateFarmer() {
         //Given
-        Farmer current = new Farmer();
-        current.setFarmerId(5);
-        current.setDropOut(false);
-
-        assertTrue(farmerRepository.createFarmer(current));
-
-        final String sql = "SELECT * FROM AGRICULTORES WHERE ID_PERSONA = ?";
-//        Map<String, Object> retrieved = jdbcTemplate.queryForMap(sql, RowMapper<Farmer>);
-
-//        assertEquals(retrieved);
-
-
+        int personId = 5;
+        Farmer current = createDummyFarmer(personId, false);
+        boolean isCreated = farmerRepository.createFarmer(current);
+        //when
+        Farmer expected = readFarmer(personId);
+        boolean isDeleted = deleteFarmer(personId);
+        //then
+        assertCreations(current, expected, isCreated, isDeleted);
     }
 
+    private Farmer createDummyFarmer(@NonNull int personId, @NonNull boolean dropOut) {
+        Farmer farmer = new Farmer();
+        farmer.setPersonId(personId);
+        farmer.setDropOut(dropOut);
+        return farmer;
+    }
+
+    private Farmer readFarmer(int personId) {
+        final String readSql = "SELECT id_persona, baja FROM AGRICULTORES WHERE ID_PERSONA = ?";
+        return jdbcTemplate.queryForObject(readSql,new FarmerRowMapper(), personId);
+    }
+
+    private boolean deleteFarmer(int personId){
+        final String deleteSql = "DELETE FROM AGRICULTORES WHERE ID_PERSONA = ?";
+        return jdbcTemplate.update(deleteSql,personId)>0;
+    }
+
+    private void assertCreations(@NonNull Farmer current,
+                                      @NonNull Farmer expected,
+                                      @NonNull boolean isCreated,
+                                      @NonNull boolean isDeleted) {
+        assertEquals(current, expected);
+        assertTrue(isDeleted);
+        assertTrue(isCreated);
+    }
+
+    class FarmerRowMapper implements RowMapper<Farmer> {
+        @Override
+        public Farmer mapRow(ResultSet rs, int rowNumber) throws SQLException {
+            Farmer farmer = new Farmer();
+            farmer.setPersonId(rs.getInt(1));
+            farmer.setDropOut(rs.getBoolean(2));
+            return farmer;
+        }
+
+    }
 }

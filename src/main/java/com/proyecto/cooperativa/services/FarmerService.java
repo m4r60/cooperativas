@@ -20,8 +20,8 @@ public class FarmerService {
     }
 
     public String createFarmer(@NonNull Farmer farmer){
-        final String CREATION_MESSAGE = "Se ha podido crear el agricultor";
-        final String ERROR_MESSAGE = "No se ha podido crear el Agricultor";
+        final String CREATION_MESSAGE = "Se ha dado de alta un agricultor";
+        final String ERROR_MESSAGE = "No se ha podido dar de alta el agricultor";
         if(farmerRepository.createFarmer(farmer)){
             return CREATION_MESSAGE;
         } else {
