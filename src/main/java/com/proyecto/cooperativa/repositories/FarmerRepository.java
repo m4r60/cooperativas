@@ -101,7 +101,7 @@ public class FarmerRepository {
         return inserting(farmer, sql);
     }
 
-    private boolean inserting(Farmer farmer, String sql) {
+    private boolean inserting(@NonNull Farmer farmer, String sql) {
         boolean isUpdated = false;
         try {
             isUpdated = jdbcTemplate.update(sql, farmer.getPersonId(),

@@ -134,7 +134,7 @@ public class farmerRepositoryTest {
     public void testCreateFarmer() {
         //Given
         int personId = 5;
-        Farmer current = createDummyFarmer(personId, false);
+        Farmer current = createDummyFarmer(personId);
         boolean isCreated = farmerRepository.createFarmer(current);
         //when
         Farmer expected = readFarmer(personId);
@@ -143,10 +143,10 @@ public class farmerRepositoryTest {
         assertCreations(current, expected, isCreated, isDeleted);
     }
 
-    private Farmer createDummyFarmer(@NonNull int personId, @NonNull boolean dropOut) {
+    private Farmer createDummyFarmer(@NonNull int personId) {
         Farmer farmer = new Farmer();
         farmer.setPersonId(personId);
-        farmer.setDropOut(dropOut);
+        farmer.setDropOut(false);
         return farmer;
     }
 
