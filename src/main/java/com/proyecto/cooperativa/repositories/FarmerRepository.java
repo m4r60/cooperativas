@@ -106,9 +106,9 @@ public class FarmerRepository {
         try {
             isUpdated = jdbcTemplate.update(sql, farmer.getPersonId(),
                     farmer.isDropOut()) > 0;
-            log.info("Insercion en la tabla AGRICULTORES, query: " + sql);
+            log.info("Insercion en la tabla AGRICULTORES, query: {}" , sql);
         } catch (Exception e) {
-            log.error("Error: Insertar en la tabla AGRICULTORES, query: " + sql);
+            log.error("Error: Insertar en la tabla AGRICULTORES, query: {} ", sql);
         }
         return isUpdated;
     }
@@ -135,9 +135,9 @@ public class FarmerRepository {
         boolean isUpdated = false;
         try{
             isUpdated= jdbcTemplate.update(sql,farmer.isDropOut(), farmer.getPersonId()) > 0;
-            log.info("Se ha dado de baja una persona, query:" + sql);
+            log.info("Se ha dado de baja una persona, query: {}", sql);
         }catch(Exception e){
-            log.error("No se ha podido dar de baja a la persona, query: " + sql);
+            log.error("No se ha podido dar de baja a la persona, query: {} ", sql);
         }
         return isUpdated;
     }
