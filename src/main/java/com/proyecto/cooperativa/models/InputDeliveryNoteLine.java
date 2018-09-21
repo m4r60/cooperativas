@@ -5,10 +5,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class InputDeliveryNoteLine {
+public class InputDeliveryNoteLine implements Serializable {
     //Si pongo extends serializable me permite enviar objetos por la red
     //en bytes y luego porder deserializarlos.
     private int deliveryNoteId;

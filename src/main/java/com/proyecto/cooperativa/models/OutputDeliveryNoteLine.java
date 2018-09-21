@@ -5,10 +5,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OutputDeliveryNoteLine {
+public class OutputDeliveryNoteLine implements Serializable {
     private int deliveryNoteId;
     private int lineId;
     private String type;

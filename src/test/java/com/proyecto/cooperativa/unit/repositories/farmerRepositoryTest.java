@@ -6,6 +6,8 @@ import lombok.NonNull;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -28,7 +30,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class farmerRepositoryTest {
-
+    private static final Logger log = LoggerFactory.getLogger(farmerRepositoryTest.class);
     @Autowired
     FarmerRepository farmerRepository;
 
@@ -177,6 +179,11 @@ public class farmerRepositoryTest {
             farmer.setDropOut(rs.getBoolean(2));
             return farmer;
         }
+
+    }
+
+    @Test
+    private void dropOutFarmer(){
 
     }
 }

@@ -5,12 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
 import java.util.stream.Stream;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OutputBill {
+public class OutputBill implements Serializable {
     private int billId;
     private String date;
     private int iva;

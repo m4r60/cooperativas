@@ -1,6 +1,8 @@
 package com.proyecto.cooperativa.models;
 
 import lombok.*;
+
+import java.io.Serializable;
 //@toString() - Cuando pintas un objeto sale una referencia. Si pones toString()
 //Se pinta el contenido del objeto.
 //Si quieres determinar un tipo de igualdad - @EqualsAndHashCode
@@ -31,7 +33,7 @@ are marked as @NonNull that aren't initialized where they are declared. For thos
 //Indicates that an annotated class is a "component". Such classes are considered as candidates for auto-detection when using annotation-based configuration and classpath scanning.
 @AllArgsConstructor //Tengo un constructor con todos los elementos.
 @NoArgsConstructor
-public class Person {
+public class Person implements Serializable {
     private int personId;
     private String cifNif;
     private String name;
