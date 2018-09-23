@@ -7,10 +7,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.springframework.util.StringUtils.isEmpty;
 
 @Repository
 public class FarmerRepository {
@@ -30,10 +31,11 @@ public class FarmerRepository {
     private static final String VALUES = " ) VALUES (";
     private static final String QUESTION_MARK = "?";
     private static final String TABLE_NAME = " AGRICULTORES ";
-    private static final String PARENTHESIS = " (";
+    private static final String INITIAL_PARENTHESIS = " (";
     private static final String UPDATE = "UPDATE ";
     private static final String SET = " SET ";
     private static final String EQUALS_SIGN = " = ";
+    private static final String FINAL_PARENTHESIS = ") ";
 
     private List<String> farmerFieldsToGet = Arrays.asList("a.n_socio", "p.cif_nif",
             "p.nombre_razon_social",
@@ -81,7 +83,7 @@ public class FarmerRepository {
 
     private String buildWhereList(String textToSearch) {
         String whereClause = "";
-        if (!StringUtils.isEmpty(textToSearch)) {
+        if (!isEmpty(textToSearch)) {
             whereClause = WHERE
                     + farmerFieldsToGet.stream()
                     .collect(Collectors.joining(LIKE + OR))
@@ -93,24 +95,25 @@ public class FarmerRepository {
     public boolean createFarmer(Farmer farmer) {
         final String sql = INSERT_INTO
                 + TABLE_NAME
-                + PARENTHESIS
+                + INITIAL_PARENTHESIS
                 + farmerFieldsToCreate.stream()
                     .collect(Collectors.joining(COMMA_SEPARATOR))
                 + VALUES
-                + buildValuesWithQuestionMarks(farmerFieldsToCreate.size());
+                + buildValuesWithQuestionMarks(farmerFieldsToCreate.size())
+                + FINAL_PARENTHESIS;
         return inserting(farmer, sql);
     }
 
     private boolean inserting(Farmer farmer, String sql) {
-        boolean isUpdated = false;
+        boolean isInserted = false;
         try {
-            isUpdated = jdbcTemplate.update(sql, farmer.getPersonId(),
+            isInserted = jdbcTemplate.update(sql, farmer.getPersonId(),
                     farmer.isDropOut()) > 0;
             log.info("Insercion en la tabla AGRICULTORES, query: {}" , sql);
         } catch (Exception e) {
             log.error("Error: Insertar en la tabla AGRICULTORES, query: {} ", sql);
         }
-        return isUpdated;
+        return isInserted;
     }
 
     private String buildValuesWithQuestionMarks(int numberOfValues) {

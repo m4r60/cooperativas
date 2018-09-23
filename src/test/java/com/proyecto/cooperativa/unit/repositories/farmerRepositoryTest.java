@@ -26,11 +26,13 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.util.StringUtils.isEmpty;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class farmerRepositoryTest {
     private static final Logger log = LoggerFactory.getLogger(farmerRepositoryTest.class);
+
     @Autowired
     FarmerRepository farmerRepository;
 
@@ -112,7 +114,7 @@ public class farmerRepositoryTest {
         long ZERO = 0;
         long incorrectMaps = actual.stream()
                 .filter(map -> map.containsKey(field)
-                        && !StringUtils.isEmpty(map.get(field))
+                        && !isEmpty(map.get(field))
                         && !map.get(field).toString().matches(getValidationStringFrom(field)))
                 .count();
         assertThat(incorrectMaps, is(ZERO));
@@ -135,14 +137,14 @@ public class farmerRepositoryTest {
     @Test
     public void testCreateFarmer() {
         //Given
-        int personId = 5;
+        int personId = 7;
         Farmer current = createDummyFarmer(personId);
-        boolean isCreated = farmerRepository.createFarmer(current);
+        assertTrue(farmerRepository.createFarmer(current));
         //when
         Farmer expected = readFarmer(personId);
         boolean isDeleted = deleteFarmer(personId);
         //then
-        assertCreations(current, expected, isCreated, isDeleted);
+        assertCreations(current, expected, isDeleted);
     }
 
     private Farmer createDummyFarmer(@NonNull int personId) {
@@ -154,36 +156,47 @@ public class farmerRepositoryTest {
 
     private Farmer readFarmer(int personId) {
         final String readSql = "SELECT id_persona, baja FROM AGRICULTORES WHERE ID_PERSONA = ?";
-        return jdbcTemplate.queryForObject(readSql,new FarmerRowMapper(), personId);
+        return jdbcTemplate.queryForObject(readSql, new Integer[] {personId}, new FarmerRowMapper());
     }
 
-    private boolean deleteFarmer(int personId){
+    private boolean deleteFarmer(int personId) {
         final String deleteSql = "DELETE FROM AGRICULTORES WHERE ID_PERSONA = ?";
-        return jdbcTemplate.update(deleteSql,personId)>0;
+        return jdbcTemplate.update(deleteSql, personId) > 0;
     }
 
     private void assertCreations(@NonNull Farmer current,
-                                      @NonNull Farmer expected,
-                                      @NonNull boolean isCreated,
-                                      @NonNull boolean isDeleted) {
+                                 @NonNull Farmer expected,
+                                 @NonNull boolean isDeleted) {
         assertEquals(current, expected);
         assertTrue(isDeleted);
-        assertTrue(isCreated);
     }
 
     class FarmerRowMapper implements RowMapper<Farmer> {
         @Override
         public Farmer mapRow(ResultSet rs, int rowNumber) throws SQLException {
             Farmer farmer = new Farmer();
-            farmer.setPersonId(rs.getInt(1));
-            farmer.setDropOut(rs.getBoolean(2));
+            farmer.setPersonId(rs.getInt("id_persona"));
+            farmer.setDropOut(rs.getBoolean("baja"));
             return farmer;
         }
 
     }
 
     @Test
-    private void dropOutFarmer(){
-
+    public void dropOutFarmer() {
+        int personId = 6;
+        Farmer current = createDummyFarmer(personId);
+//        insert entity
+        assertTrue(farmerRepository.createFarmer(current));
+//        change entity properties
+        current.setDropOut(true);
+//        update entity
+        farmerRepository.dropOut(current);
+//        read updated entity
+        Farmer expected= readFarmer(current.getPersonId());
+//        compare changed entity and read entity
+        assertEquals(current,expected);
+//        delete entity
+        assertTrue(deleteFarmer(current.getPersonId()));
     }
 }
