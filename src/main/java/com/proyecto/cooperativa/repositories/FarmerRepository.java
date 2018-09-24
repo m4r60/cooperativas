@@ -1,13 +1,17 @@
 package com.proyecto.cooperativa.repositories;
 
 import com.proyecto.cooperativa.models.Farmer;
+import com.proyecto.cooperativa.models.Preffix;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,12 +34,21 @@ public class FarmerRepository {
     private static final String INSERT_INTO = "INSERT INTO ";
     private static final String VALUES = " ) VALUES (";
     private static final String QUESTION_MARK = "?";
-    private static final String TABLE_NAME = " AGRICULTORES ";
+    private static final String FARMERS = " AGRICULTORES ";
+    private static final String PERSONS = " PERSONAS ";
     private static final String INITIAL_PARENTHESIS = " (";
     private static final String UPDATE = "UPDATE ";
     private static final String SET = " SET ";
     private static final String EQUALS_SIGN = " = ";
     private static final String FINAL_PARENTHESIS = ") ";
+    private static final String ALL = "*";
+    private static final String JOIN = " JOIN ";
+    private static final String ON = " ON ";
+    private static final String ID_PERSONA = "id_persona";
+    private static final String AND = " AND ";
+    private static final String BAJA = "baja";
+    private static final String FALSE = "false";
+
 
     private List<String> farmerFieldsToGet = Arrays.asList("a.n_socio", "p.cif_nif",
             "p.nombre_razon_social",
@@ -43,7 +56,7 @@ public class FarmerRepository {
             "p.direccion",
             "p.telefono",
             "p.email");
-    private List<String> farmerFieldsToCreate = Arrays.asList("id_persona", "baja");
+    private List<String> farmerFieldsToCreate = Arrays.asList(ID_PERSONA, BAJA);
 
     public List<Map<String, Object>> getFarmersList(String textToSearch) {
         String query = buildSql(textToSearch);
@@ -77,8 +90,9 @@ public class FarmerRepository {
     private String buildSelectList() {
         return SELECT
                 + farmerFieldsToGet.stream().collect(Collectors.joining(COMMA_SEPARATOR))
-                + FROM + "PERSONAS p "
-                + " JOIN agricultores a ON (p.id_persona = a.id_persona) ";
+                + FROM + PERSONS + Preffix.PERSON.replace(".", "")
+                + JOIN + FARMERS + Preffix.FARMER.replace(".", "") + ON
+                + INITIAL_PARENTHESIS + Preffix.PERSON + ID_PERSONA + EQUALS_SIGN + Preffix.FARMER + ID_PERSONA + FINAL_PARENTHESIS;
     }
 
     private String buildWhereList(String textToSearch) {
@@ -94,10 +108,10 @@ public class FarmerRepository {
 
     public boolean createFarmer(Farmer farmer) {
         final String sql = INSERT_INTO
-                + TABLE_NAME
+                + FARMERS
                 + INITIAL_PARENTHESIS
                 + farmerFieldsToCreate.stream()
-                    .collect(Collectors.joining(COMMA_SEPARATOR))
+                .collect(Collectors.joining(COMMA_SEPARATOR))
                 + VALUES
                 + buildValuesWithQuestionMarks(farmerFieldsToCreate.size())
                 + FINAL_PARENTHESIS;
@@ -109,7 +123,7 @@ public class FarmerRepository {
         try {
             isInserted = jdbcTemplate.update(sql, farmer.getPersonId(),
                     farmer.isDropOut()) > 0;
-            log.info("Insercion en la tabla AGRICULTORES, query: {}" , sql);
+            log.info("Insercion en la tabla AGRICULTORES, query: {}", sql);
         } catch (Exception e) {
             log.error("Error: Insertar en la tabla AGRICULTORES, query: {} ", sql);
         }
@@ -121,29 +135,78 @@ public class FarmerRepository {
                 .collect(Collectors.joining(COMMA_SEPARATOR));
     }
 
-
-    public boolean dropOut(Farmer farmer){
+    public boolean dropOut(Farmer farmer) {
         final String sql = buildSqlDropOut();
-        return setDropOut(farmer,sql);
+        return setDropOut(farmer, sql);
     }
 
-    private String buildSqlDropOut(){
-        return  UPDATE + TABLE_NAME + SET + farmerFieldsToCreate.stream()
+    private String buildSqlDropOut() {
+        return UPDATE + FARMERS + SET + farmerFieldsToCreate.stream()
                 .map(entry -> entry + EQUALS_SIGN + QUESTION_MARK)
                 .sorted(Comparator.comparing(n -> n))
                 .collect(Collectors.joining(WHERE));
     }
 
-    private boolean setDropOut(Farmer farmer, String sql){
+    private boolean setDropOut(Farmer farmer, String sql) {
         boolean isUpdated = false;
-        try{
-            isUpdated= jdbcTemplate.update(sql,farmer.isDropOut(), farmer.getPersonId()) > 0;
+        try {
+            isUpdated = jdbcTemplate.update(sql, farmer.isDropOut(), farmer.getPersonId()) > 0;
             log.info("Se ha dado de baja una persona, query: {}", sql);
-        }catch(Exception e){
+        } catch (Exception e) {
             log.error("No se ha podido dar de baja a la persona, query: {} ", sql);
         }
         return isUpdated;
     }
 
+    public Farmer read(int personId) {
+        final String query = SELECT
+                + Preffix.PERSON
+                + ALL
+                + FROM
+                + PERSONS
+                + JOIN
+                + INITIAL_PARENTHESIS
+                + Preffix.PERSON
+                + ID_PERSONA
+                + EQUALS_SIGN
+                + Preffix.FARMER
+                + ID_PERSONA
+                + FINAL_PARENTHESIS
+                + WHERE
+                + Preffix.FARMER + ID_PERSONA + EQUALS_SIGN + QUESTION_MARK
+                + AND + Preffix.FARMER + BAJA + EQUALS_SIGN + FALSE;
+        return getFarmer(personId,query);
+    }
+
+    private Farmer getFarmer(int personId, String query){
+        String message = "Retrieving farmer object, query: {}";
+        Farmer farmer = new Farmer();
+        try {
+            farmer = jdbcTemplate.queryForObject(query, new Integer[]{personId}, new FarmerRowMapper());
+            log.info(message, query);
+        } catch (Exception e) {
+            log.error("Error: {} {}", message, query);
+        }
+        return farmer;
+
+    }
+
+    class FarmerRowMapper implements RowMapper<Farmer> {
+        @Override
+        public Farmer mapRow(ResultSet rs, int rowNumber) throws SQLException {
+            Farmer farmer = new Farmer();
+            farmer.setCifNif(rs.getString("cif_nif"));
+            farmer.setName(rs.getString("nombre_razon_social"));
+            farmer.setLastName(rs.getString("apellidos"));
+            farmer.setAdress(rs.getString("direccion"));
+            farmer.setPhoneNumber(rs.getString("telefono"));
+            farmer.setEmail(rs.getString("email"));
+            farmer.setFarmerId(rs.getInt("n_socio"));
+            farmer.setPersonId(rs.getInt(ID_PERSONA));
+            farmer.setDropOut(rs.getBoolean(BAJA));
+            return farmer;
+        }
+
+    }
 
 }
