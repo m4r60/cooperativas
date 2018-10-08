@@ -20,8 +20,10 @@ public class FarmerController {
 
     private static final String SLASH = "/";
     private static final String FARMER_LIST = "farmerList";
+    private static final String FARMER_MAP = "farmerMap";
     private static final String SAVE_FARMER = "saveFarmer";
     private static final String DROP_OUT_FARMER = "dropOutFarmer";
+    private static final String READ_FARMER = "readFarmer";
 
     @PostMapping(SLASH + FARMER_LIST)
     public Model farmerList (@RequestParam String textToSearch, Model model){
@@ -31,13 +33,19 @@ public class FarmerController {
 
     @PostMapping(SLASH + SAVE_FARMER)
     public Model save (@RequestParam Farmer farmer, Model model){
-        model.addAttribute(FARMER_LIST, farmerService.createFarmer(farmer));
+        model.addAttribute(FARMER_LIST, farmerService.create(farmer));
         return model;
     }
 
     @PostMapping(SLASH + DROP_OUT_FARMER)
     public Model dropOut (@RequestParam Farmer farmer, Model model){
-        model.addAttribute(FARMER_LIST, farmerService.dropOutFarmer(farmer));
+        model.addAttribute(FARMER_LIST, farmerService.dropOut(farmer));
+        return model;
+    }
+
+    @PostMapping(SLASH + READ_FARMER)
+    public Model read(@RequestParam Farmer farmer, Model model){
+        model.addAttribute(FARMER_MAP, farmerService.read(farmer));
         return model;
     }
 

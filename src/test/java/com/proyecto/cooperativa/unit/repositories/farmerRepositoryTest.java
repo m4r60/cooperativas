@@ -1,7 +1,10 @@
 package com.proyecto.cooperativa.unit.repositories;
 
+import com.proyecto.cooperativa.models.Constants;
 import com.proyecto.cooperativa.models.Farmer;
+import com.proyecto.cooperativa.models.Person;
 import com.proyecto.cooperativa.repositories.FarmerRepository;
+import com.proyecto.cooperativa.repositories.PersonRepository;
 import lombok.NonNull;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Test;
@@ -13,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,6 +37,9 @@ public class farmerRepositoryTest {
 
     @Autowired
     FarmerRepository farmerRepository;
+
+    @Autowired
+    PersonRepository personRepository;
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -139,7 +144,7 @@ public class farmerRepositoryTest {
         //Given
         int personId = 7;
         Farmer current = createDummyFarmer(personId);
-        assertTrue(farmerRepository.createFarmer(current));
+        assertTrue(farmerRepository.create(current));
         //when
         Farmer expected = readFarmer(personId);
         boolean isDeleted = deleteFarmer(personId);
@@ -156,7 +161,7 @@ public class farmerRepositoryTest {
 
     private Farmer readFarmer(int personId) {
         final String readSql = "SELECT id_persona, baja FROM AGRICULTORES WHERE ID_PERSONA = ?";
-        return jdbcTemplate.queryForObject(readSql, new Integer[] {personId}, new FarmerRowMapper());
+        return jdbcTemplate.queryForObject(readSql, new Integer[]{personId}, new FarmerRowMapper());
     }
 
     private boolean deleteFarmer(int personId) {
@@ -186,17 +191,65 @@ public class farmerRepositoryTest {
     public void dropOutFarmer() {
         int personId = 6;
         Farmer current = createDummyFarmer(personId);
-//        insert entity
-        assertTrue(farmerRepository.createFarmer(current));
-//        change entity properties
+        assertTrue(farmerRepository.create(current));
         current.setDropOut(true);
-//        update entity
         farmerRepository.dropOut(current);
-//        read updated entity
-        Farmer expected= readFarmer(current.getPersonId());
-//        compare changed entity and read entity
-        assertEquals(current,expected);
-//        delete entity
+        Farmer expected = readFarmer(current.getPersonId());
+        assertEquals(current, expected);
         assertTrue(deleteFarmer(current.getPersonId()));
     }
+
+    @Test
+    public void readFarmer() {
+        int personId = 20;
+        Farmer actual = createDummyFarmer(personId);
+        Person person = createDummyPerson();
+        boolean isPersonCreated = personRepository.create(person);
+        boolean isFarmerCreated = farmerRepository.create(actual);
+        Farmer expected = farmerRepository.read(personId);
+        assertActualAndExceptedFarmer(actual, expected);
+
+    }
+
+
+    private Person createDummyPerson(){
+        Person person = new Person();
+        person.setPhoneNumber("956123456");
+        person.setAdress("C/hola");
+        person.setName("Juan");
+        person.setLastName("Troya");
+        person.setCifNif("54129784s");
+        person.setEmail("meritorio@meritocracia.es");
+        return person;
+    }
+
+    private void assertActualAndExceptedFarmer(Farmer actual, Farmer expected) {
+        assertThat(actual, not(isEmpty(actual)));
+        assertThat(expected, not(isEmpty(expected)));
+        assertThat(actual, is(expected));
+        assertEquals(actual, expected);
+        validateStringFrom(EMAIL, expected);
+        validateStringFrom(PHONE, expected);
+        validateStringFrom(CIF_NIF, expected);
+        assertTrue(deleteFarmer(actual.getPersonId()));
+
+    }
+
+    private void validateStringFrom(String field, Farmer farmer) {
+        boolean isValidated = false;
+        switch (field) {
+            case EMAIL:
+                isValidated = farmer.getEmail().matches(Constants.EMAIL_VALIDATION);
+                break;
+            case PHONE:
+                isValidated = farmer.getPhoneNumber().matches(Constants.PHONE_NUMBER_VALIDATION);
+                break;
+            case CIF_NIF:
+                isValidated = farmer.getCifNif().matches(Constants.CIF_NIF_VALIDATION);
+                break;
+        }
+        assertTrue(isValidated);
+    }
+
 }
+
