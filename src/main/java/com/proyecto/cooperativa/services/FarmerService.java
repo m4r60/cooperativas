@@ -27,7 +27,7 @@ public class FarmerService {
     public String create(@NonNull Farmer farmer) {
         final String CREATION_MESSAGE = SE_HA_DADO + ALTA + EL_AGRICULTOR;
         final String ERROR_MESSAGE = NO_SE_HA_PODIDO + ALTA + EL_AGRICULTOR;
-        if (farmerRepository.createFarmer(farmer)) {
+        if (farmerRepository.create(farmer)) {
             return CREATION_MESSAGE;
         } else {
             return ERROR_MESSAGE;
