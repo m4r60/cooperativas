@@ -15,6 +15,8 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.proyecto.cooperativa.models.Constants.*;
+import static com.proyecto.cooperativa.utils.JdbcUtils.buildValuesWithQuestionMarks;
 import static org.springframework.util.StringUtils.isEmpty;
 
 @Repository
@@ -24,38 +26,13 @@ public class FarmerRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private static final String SELECT = "SELECT ";
-    private static final String FROM = " FROM ";
-    private static final String WHERE = " WHERE ";
-    private static final String LIKE = " LIKE ?";
-    private static final String OR = " OR ";
-    private static final String PERCENT = "%";
-    private static final String COMMA_SEPARATOR = ", ";
-    private static final String INSERT_INTO = "INSERT INTO ";
-    private static final String VALUES = " ) VALUES (";
-    private static final String QUESTION_MARK = "?";
-    private static final String FARMERS = " AGRICULTORES ";
-    private static final String PERSONS = " PERSONAS ";
-    private static final String INITIAL_PARENTHESIS = " (";
-    private static final String UPDATE = "UPDATE ";
-    private static final String SET = " SET ";
-    private static final String EQUALS_SIGN = " = ";
-    private static final String FINAL_PARENTHESIS = ") ";
-    private static final String ALL = "*";
-    private static final String JOIN = " JOIN ";
-    private static final String ON = " ON ";
-    private static final String ID_PERSONA = "id_persona";
-    private static final String AND = " AND ";
-    private static final String BAJA = "baja";
-    private static final String FALSE = "false";
-
-
-    private List<String> farmerFieldsToGet = Arrays.asList("a.n_socio", "p.cif_nif",
-            "p.nombre_razon_social",
-            "p.apellidos",
-            "p.direccion",
-            "p.telefono",
-            "p.email");
+    private List<String> farmerFieldsToGet = Arrays.asList(Preffix.FARMER + "n_socio",
+            Preffix.PERSON + "cif_nif",
+            Preffix.PERSON + "nombre_razon_social",
+            Preffix.PERSON + "apellidos",
+            Preffix.PERSON + "direccion",
+            Preffix.PERSON + "telefono",
+            Preffix.PERSON + "email");
     private List<String> farmerFieldsToCreate = Arrays.asList(ID_PERSONA, BAJA);
 
     public List<Map<String, Object>> getFarmersList(String textToSearch) {
@@ -90,8 +67,8 @@ public class FarmerRepository {
     private String buildSelectList() {
         return SELECT
                 + farmerFieldsToGet.stream().collect(Collectors.joining(COMMA_SEPARATOR))
-                + FROM + PERSONS + Preffix.PERSON.replace(".", "")
-                + JOIN + FARMERS + Preffix.FARMER.replace(".", "") + ON
+                + FROM + PERSONAS + Preffix.PERSON.replace(".", "")
+                + JOIN + AGRICULTORES + Preffix.FARMER.replace(".", "") + ON
                 + INITIAL_PARENTHESIS + Preffix.PERSON + ID_PERSONA + EQUALS_SIGN + Preffix.FARMER + ID_PERSONA + FINAL_PARENTHESIS;
     }
 
@@ -106,12 +83,12 @@ public class FarmerRepository {
         return whereClause;
     }
 
-    public boolean createFarmer(Farmer farmer) {
+    public boolean create(Farmer farmer) {
         final String sql = INSERT_INTO
-                + FARMERS
+                + AGRICULTORES
                 + INITIAL_PARENTHESIS
                 + farmerFieldsToCreate.stream()
-                .collect(Collectors.joining(COMMA_SEPARATOR))
+                    .collect(Collectors.joining(COMMA_SEPARATOR))
                 + VALUES
                 + buildValuesWithQuestionMarks(farmerFieldsToCreate.size())
                 + FINAL_PARENTHESIS;
@@ -123,16 +100,11 @@ public class FarmerRepository {
         try {
             isInserted = jdbcTemplate.update(sql, farmer.getPersonId(),
                     farmer.isDropOut()) > 0;
-            log.info("Insercion en la tabla AGRICULTORES, query: {}", sql);
+            log.info("Inserción en la tabla AGRICULTORES, query: {}", sql);
         } catch (Exception e) {
             log.error("Error: Insertar en la tabla AGRICULTORES, query: {} ", sql);
         }
         return isInserted;
-    }
-
-    private String buildValuesWithQuestionMarks(int numberOfValues) {
-        return Collections.nCopies(numberOfValues, QUESTION_MARK).stream()
-                .collect(Collectors.joining(COMMA_SEPARATOR));
     }
 
     public boolean dropOut(Farmer farmer) {
@@ -141,7 +113,7 @@ public class FarmerRepository {
     }
 
     private String buildSqlDropOut() {
-        return UPDATE + FARMERS + SET + farmerFieldsToCreate.stream()
+        return UPDATE + AGRICULTORES + SET + farmerFieldsToCreate.stream()
                 .map(entry -> entry + EQUALS_SIGN + QUESTION_MARK)
                 .sorted(Comparator.comparing(n -> n))
                 .collect(Collectors.joining(WHERE));
@@ -163,7 +135,7 @@ public class FarmerRepository {
                 + Preffix.PERSON
                 + ALL
                 + FROM
-                + PERSONS
+                + PERSONAS
                 + JOIN
                 + INITIAL_PARENTHESIS
                 + Preffix.PERSON
