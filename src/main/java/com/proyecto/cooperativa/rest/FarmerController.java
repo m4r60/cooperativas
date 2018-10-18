@@ -9,7 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+
+import java.util.Optional;
 
 @Controller
 public class FarmerController {
@@ -20,15 +24,15 @@ public class FarmerController {
 
     private static final String SLASH = "/";
     private static final String FARMER_LIST = "farmerList";
-    private static final String FARMER_MAP = "farmerMap";
+    private static final String GET_FARMER = "getFarmer";
     private static final String SAVE_FARMER = "saveFarmer";
     private static final String DROP_OUT_FARMER = "dropOutFarmer";
     private static final String READ_FARMER = "readFarmer";
 
-    @PostMapping(SLASH + FARMER_LIST)
-    public Model farmerList (@RequestParam String textToSearch, Model model){
-        model.addAttribute(FARMER_LIST,farmerService.getFarmersList(textToSearch));
-        return model;
+    @RequestMapping(SLASH + FARMER_LIST)
+    public String farmerList (Model model, @RequestParam Optional<String> textToSearch){
+        model.addAttribute(FARMER_LIST, farmerService.getFarmersList(textToSearch.orElse("")));
+        return FARMER_LIST;
     }
 
     @PostMapping(SLASH + SAVE_FARMER)
@@ -45,7 +49,7 @@ public class FarmerController {
 
     @PostMapping(SLASH + READ_FARMER)
     public Model read(@RequestParam Farmer farmer, Model model){
-        model.addAttribute(FARMER_MAP, farmerService.read(farmer));
+        model.addAttribute(GET_FARMER, farmerService.read(farmer));
         return model;
     }
 
